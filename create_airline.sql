@@ -88,7 +88,7 @@ CREATE TABLE AIRLINE.CITY
 (
 	"city_id" SERIAL,
 	"country_id" INT NOT NULL,
-	"city_name" INT NOT NULL,
+	"city_name" VARCHAR(128) NOT NULL,
 	PRIMARY KEY ("city_id")
 );
 COMMENT ON COLUMN AIRLINE.CITY."city_id" IS 'id города';
