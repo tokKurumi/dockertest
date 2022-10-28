@@ -11,57 +11,28 @@ CREATE TABLE AIRLINE.AIRLINE
 COMMENT ON COLUMN AIRLINE.AIRLINE."airline_id" IS 'id авиакомпании';
 COMMENT ON COLUMN AIRLINE.AIRLINE."airline_name" IS 'наименование авиакомпании';
 
--- CREATING TABLE "FLIGHT"
-CREATE TABLE AIRLINE.FLIGHT
+-- CREATING TABLE "COUNTRY"
+CREATE TABLE AIRLINE.COUNTRY
 (
-	"flight_id" SERIAL,
-	"depature_datetime" TIMESTAMP NOT NULL DEFAULT NOW(),
-	"arrival_datetime" TIMESTAMP NOT NULL,
-	"depature_city_id" INT NOT NULL,
-	"arrival_city_id" INT NOT NULL,
-	PRIMARY KEY ("flight_id")
+	"country_id" SERIAL,
+	"country_name" VARCHAR(64) NOT NULL,
+	PRIMARY KEY ("country_id")
 );
-COMMENT ON COLUMN AIRLINE.FLIGHT."flight_id" IS 'id авиаперелета';
-COMMENT ON COLUMN AIRLINE.FLIGHT."depature_datetime" IS 'дата и время отбытия';
-COMMENT ON COLUMN AIRLINE.FLIGHT."arrival_datetime" IS 'дата и время прибытия';
-COMMENT ON COLUMN AIRLINE.FLIGHT."depature_city_id" IS 'город отбытия';
-COMMENT ON COLUMN AIRLINE.FLIGHT."arrival_city_id" IS 'город прибытия';
+COMMENT ON COLUMN AIRLINE.COUNTRY."country_id" IS 'id страны';
+COMMENT ON COLUMN AIRLINE.COUNTRY."country_name" IS 'наименование страны';
 
--- CREATING TABLE "PLACE"
-CREATE TYPE AIRLINE.CLASS_TYPE AS ENUM ('1', '2', '3');
-CREATE TABLE AIRLINE.PLACE
+-- CREATING TABLE "CITY"
+CREATE TABLE AIRLINE.CITY
 (
-	"place_id" SERIAL,
-	"class_id" AIRLINE.CLASS_TYPE NOT NULL,
-	"is_free" BOOLEAN NOT NULL DEFAULT TRUE,
-	PRIMARY KEY ("place_id")
+	"city_id" SERIAL,
+	"country_id" INT NOT NULL,
+	"city_name" VARCHAR(128) NOT NULL,
+	PRIMARY KEY ("city_id"),
+	FOREIGN KEY ("country_id") REFERENCES AIRLINE.COUNTRY("country_id")
 );
-COMMENT ON COLUMN AIRLINE.PLACE."place_id" IS 'id места';
-COMMENT ON COLUMN AIRLINE.PLACE."class_id" IS 'тип класса';
-COMMENT ON COLUMN AIRLINE.PLACE."is_free" IS 'свободно или нет';
-
--- CREATING TABLE "PASSENGER"
-CREATE TYPE AIRLINE.SEX_TYPE AS ENUM ('f', 'm');
-CREATE TABLE AIRLINE.PASSENGER
-(
-	"passenger_id" SERIAL,
-	"name" VARCHAR(64) NOT NULL,
-	"surname" VARCHAR(128) NOT NULL,
-	"secondname" VARCHAR(128) NOT NULL,
-	"sex" AIRLINE.SEX_TYPE NOT NULL,
-	"document" VARCHAR(8) NOT NULL DEFAULT 'PASSPORT',
-	"document_number" INT NOT NULL,
-	"category_id" INT NOT NULL,
-	PRIMARY KEY ("passenger_id")
-);
-COMMENT ON COLUMN AIRLINE.PASSENGER."passenger_id" IS 'id авиаперелета';
-COMMENT ON COLUMN AIRLINE.PASSENGER."name" IS 'имя пассажира';
-COMMENT ON COLUMN AIRLINE.PASSENGER."surname" IS 'фамилия пассажира';
-COMMENT ON COLUMN AIRLINE.PASSENGER."secondname" IS 'отчество пассажира';
-COMMENT ON COLUMN AIRLINE.PASSENGER."sex" IS 'пол пассажира';
-COMMENT ON COLUMN AIRLINE.PASSENGER."document" IS 'документ';
-COMMENT ON COLUMN AIRLINE.PASSENGER."document_number" IS 'номер документа';
-COMMENT ON COLUMN AIRLINE.PASSENGER."category_id" IS 'возрастная категория';
+COMMENT ON COLUMN AIRLINE.CITY."city_id" IS 'id города';
+COMMENT ON COLUMN AIRLINE.CITY."country_id" IS 'id страны';
+COMMENT ON COLUMN AIRLINE.CITY."city_name" IS 'наименование города';
 
 -- CREATING TABLE "CATEGORY"
 CREATE TABLE AIRLINE.CATEGORY
@@ -83,27 +54,60 @@ CREATE TABLE AIRLINE.RATE
 COMMENT ON COLUMN AIRLINE.RATE."rate_id" IS 'id тарифа';
 COMMENT ON COLUMN AIRLINE.RATE."rate" IS 'тариф';
 
--- CREATING TABLE "CITY"
-CREATE TABLE AIRLINE.CITY
+-- CREATING TABLE "PLACE"
+CREATE TYPE AIRLINE.CLASS_TYPE AS ENUM ('1', '2', '3');
+CREATE TABLE AIRLINE.PLACE
 (
-	"city_id" SERIAL,
-	"country_id" INT NOT NULL,
-	"city_name" VARCHAR(128) NOT NULL,
-	PRIMARY KEY ("city_id")
+	"place_id" SERIAL,
+	"class_id" AIRLINE.CLASS_TYPE NOT NULL,
+	"is_free" BOOLEAN NOT NULL DEFAULT TRUE,
+	PRIMARY KEY ("place_id")
 );
-COMMENT ON COLUMN AIRLINE.CITY."city_id" IS 'id города';
-COMMENT ON COLUMN AIRLINE.CITY."country_id" IS 'id страны';
-COMMENT ON COLUMN AIRLINE.CITY."city_name" IS 'наименование города';
+COMMENT ON COLUMN AIRLINE.PLACE."place_id" IS 'id места';
+COMMENT ON COLUMN AIRLINE.PLACE."class_id" IS 'тип класса';
+COMMENT ON COLUMN AIRLINE.PLACE."is_free" IS 'свободно или нет';
 
--- CREATING TABLE "COUNTRY"
-CREATE TABLE AIRLINE.COUNTRY
+-- CREATING TABLE "FLIGHT"
+CREATE TABLE AIRLINE.FLIGHT
 (
-	"country_id" SERIAL,
-	"country_name" VARCHAR(64) NOT NULL,
-	PRIMARY KEY ("country_id")
+	"flight_id" SERIAL,
+	"depature_datetime" TIMESTAMP NOT NULL DEFAULT NOW(),
+	"arrival_datetime" TIMESTAMP NOT NULL,
+	"depature_city_id" INT NOT NULL,
+	"arrival_city_id" INT NOT NULL,
+	PRIMARY KEY ("flight_id"),
+	FOREIGN KEY ("depature_city_id") REFERENCES AIRLINE.CITY("city_id"),
+	FOREIGN KEY ("arrival_city_id")  REFERENCES AIRLINE.CITY("city_id")
 );
-COMMENT ON COLUMN AIRLINE.COUNTRY."country_id" IS 'id страны';
-COMMENT ON COLUMN AIRLINE.COUNTRY."country_name" IS 'наименование страны';
+COMMENT ON COLUMN AIRLINE.FLIGHT."flight_id" IS 'id авиаперелета';
+COMMENT ON COLUMN AIRLINE.FLIGHT."depature_datetime" IS 'дата и время отбытия';
+COMMENT ON COLUMN AIRLINE.FLIGHT."arrival_datetime" IS 'дата и время прибытия';
+COMMENT ON COLUMN AIRLINE.FLIGHT."depature_city_id" IS 'город отбытия';
+COMMENT ON COLUMN AIRLINE.FLIGHT."arrival_city_id" IS 'город прибытия';
+
+-- CREATING TABLE "PASSENGER"
+CREATE TYPE AIRLINE.SEX_TYPE AS ENUM ('f', 'm');
+CREATE TABLE AIRLINE.PASSENGER
+(
+	"passenger_id" SERIAL,
+	"name" VARCHAR(64) NOT NULL,
+	"surname" VARCHAR(128) NOT NULL,
+	"secondname" VARCHAR(128) NOT NULL,
+	"sex" AIRLINE.SEX_TYPE NOT NULL,
+	"document" VARCHAR(8) NOT NULL DEFAULT 'PASSPORT',
+	"document_number" INT NOT NULL,
+	"category_id" INT NOT NULL,
+	PRIMARY KEY ("passenger_id"),
+	FOREIGN KEY ("category_id") REFERENCES AIRLINE.CATEGORY("category_id")
+);
+COMMENT ON COLUMN AIRLINE.PASSENGER."passenger_id" IS 'id авиаперелета';
+COMMENT ON COLUMN AIRLINE.PASSENGER."name" IS 'имя пассажира';
+COMMENT ON COLUMN AIRLINE.PASSENGER."surname" IS 'фамилия пассажира';
+COMMENT ON COLUMN AIRLINE.PASSENGER."secondname" IS 'отчество пассажира';
+COMMENT ON COLUMN AIRLINE.PASSENGER."sex" IS 'пол пассажира';
+COMMENT ON COLUMN AIRLINE.PASSENGER."document" IS 'документ';
+COMMENT ON COLUMN AIRLINE.PASSENGER."document_number" IS 'номер документа';
+COMMENT ON COLUMN AIRLINE.PASSENGER."category_id" IS 'возрастная категория';
 
 -- CREATING TABLE "TICKET"
 CREATE TYPE AIRLINE.PAYMENT_TYPE AS ENUM ('cash', 'apple_pay', 'sbp');
